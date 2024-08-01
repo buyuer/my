@@ -1,18 +1,22 @@
 module;
 export module my.base:Device;
 
+import :Type;
+
 export namespace myt::base {
 
 class Device {
 public:
-    enum ID {
+    using Index = uint8;
+    enum ID : uint8 {
         CPU = 0,
     };
 
-    Device() { }
+    Device() = default;
 
 private:
-    ID id;
+    Device::ID id_ {};
+    Device::Index index_ {};
 };
 
 } // namespace my::base

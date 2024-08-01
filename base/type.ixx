@@ -3,7 +3,6 @@ module;
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
-#include <string>
 #include <string_view>
 export module my.base:Type;
 
@@ -51,10 +50,15 @@ public:
     };
 
     Type() = default;
+    ~Type() = default;
+    Type(const Type&) = default;
+    Type(Type&&) = default;
+    Type& operator=(const Type&) = default;
+    Type& operator=(Type&&) = default;
 
     template <typename T>
         requires std::integral<T> or std::same_as<T, ID>
-    explicit Type(T id)
+    Type(T id)
         : id_(id)
     {
         if (not(id > NONE and id < SUM)) {
@@ -62,9 +66,11 @@ public:
         }
     }
 
+    ID id() const { return id_; }
+
     size_type size() const { return info_table[id_].size; }
 
-    const std::string_view& name() { return info_table[id_].name; }
+    const std::string_view& name() const { return info_table[id_].name; }
 
 private:
     ID id_ {};

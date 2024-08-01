@@ -1,7 +1,5 @@
 module;
 #include <concepts>
-#include <cstddef>
-#include <cstdint>
 #include <initializer_list>
 export module my.base:Shape;
 
