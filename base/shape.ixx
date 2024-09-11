@@ -45,6 +45,8 @@ public:
 
     size_type size() const noexcept { return size(0); }
 
+    size_type dim() const noexcept { return dimension; }
+
     bool operator==(const Shape& other) const noexcept
     {
         if (other.dimension not_eq dimension) {
@@ -59,7 +61,7 @@ public:
     }
 
 private:
-    static constexpr size_type MAX_DIM = 5;
+    static constexpr size_type MAX_DIM = 8;
     size_type dimension {};
     size_type dimValues[MAX_DIM] {};
 };

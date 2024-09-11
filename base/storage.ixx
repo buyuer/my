@@ -20,9 +20,12 @@ public:
     Storage& operator=(const Storage&) = delete;
     Storage& operator=(Storage&&) = delete;
 
-    size_type size() const { return size_; }
+    size_type size() const noexcept { return size_; }
 
-    template <typename T> T* data() { return static_cast<T*>(data_); }
+    template <typename T = void> T* data() noexcept
+    {
+        return static_cast<T*>(data_);
+    }
 
 private:
     void* data_ {};
