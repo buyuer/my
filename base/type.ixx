@@ -4,9 +4,9 @@ module;
 #include <cstddef>
 #include <cstdint>
 #include <string_view>
-export module my.base:Type;
+export module myt.base:Type;
 
-export namespace myt::base {
+export namespace myt {
 
 using size_type = std::size_t;
 using sint8 = std::int8_t;
@@ -25,6 +25,10 @@ using cpx8 = std::complex<f8>;
 using cpx16 = std::complex<f16>;
 using cpx32 = std::complex<f32>;
 using cpx64 = std::complex<f64>;
+
+}
+
+export namespace myt::base {
 
 class Type {
 public:
@@ -99,4 +103,4 @@ private:
     };
 };
 
-} // my::namespace
+}

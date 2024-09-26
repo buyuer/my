@@ -1,7 +1,7 @@
 module;
 #include <concepts>
 #include <initializer_list>
-export module my.base:Shape;
+export module myt.base:Shape;
 
 import :Type;
 

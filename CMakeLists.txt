@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_subdirectory(base)
+add_subdirectory(ops)
 
 add_executable(test test.cpp)
 target_link_libraries(test myBase)

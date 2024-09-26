@@ -1,5 +1,5 @@
 module;
-export module my.base:Device;
+export module myt.base:Device;
 
 import :Type;
 

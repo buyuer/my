@@ -1,5 +1,5 @@
 module;
-export module my.base;
+export module myt.base;
 
 export import :Type;
 export import :Shape;

@@ -1,7 +1,7 @@
 module;
 #include <concepts>
 #include <memory>
-export module my.base:Tensor;
+export module myt.base:Tensor;
 
 import :Type;
 import :Shape;

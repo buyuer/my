@@ -1,5 +1,5 @@
 module;
-export module my.base:Storage;
+export module myt.base:Storage;
 
 import :Type;
 

@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-import my.base;
+import myt.base;
 
 int main(int argc, char* argv[])
 {
