@@ -6,3 +6,4 @@ export import :Shape;
 export import :Device;
 export import :Storage;
 export import :Tensor;
+export import :Operator;

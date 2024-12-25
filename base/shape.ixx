@@ -9,7 +9,7 @@ export namespace myt::base {
 
 class Shape {
 public:
-    using size_type = myt::base::size_type;
+    using size_type = myt::size_type;
 
     Shape() = default;
     ~Shape() = default;
