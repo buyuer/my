@@ -124,6 +124,39 @@ public:
 
   size_type dim() const noexcept { return dimension; }
 
+  size_type dim_value(size_type axis) const {
+    assert(axis < dimension);
+    return dimValues[axis];
+  }
+
+  void add_dim(const size_type value) {
+    assert(dimension < MAX_DIM);
+    dimValues[dimension] = value;
+    dimension += 1;
+  }
+
+  Shape sub(const size_type axis_start) const { return sub(axis_start, dimension); }
+
+  Shape sub(const size_type axis_start, const size_type axis_end) const {
+    assert(axis_start <= axis_end);
+    assert(axis_end <= dimension);
+    Shape ret;
+    ret.dimension = axis_end - axis_start;
+    for (size_type it = axis_start, ret_it = 0; it < axis_end; ++it, ++ret_it) {
+      ret.dimValues[ret_it] = dimValues[it];
+    }
+    return ret;
+  }
+
+  std::string to_string() const {
+    std::string str{"["};
+    for (size_type axis = 0; axis < dimension; ++axis) {
+      str += std::to_string(dimValues[axis]) + ", ";
+    }
+    str += "]";
+    return std::move(str);
+  }
+
   bool operator==(const Shape &other) const noexcept {
     if (other.dimension not_eq dimension) {
       return false;
@@ -209,7 +242,7 @@ protected:
 
 class Storage {
 public:
-  explicit Storage(Device &device, sizeT size) : device_{device}, size_{size} { data_ = device.malloc(size); }
+  explicit Storage(Device &device, const sizeT size) : device_{device}, size_{size} { data_ = device.malloc(size); }
 
   ~Storage() { device_.free(data_); }
 
@@ -244,7 +277,7 @@ public:
 
   protected:
     Tensor &tensor_;
-    uint8  *ptr_{};
+    byteT  *ptr_{};
   };
 
   template <typename T, sizeT Dim, sizeT SubDim = Dim - 1>
@@ -286,24 +319,59 @@ public:
     storage_ = std::make_shared<Storage>(device, shape_.size() * type.size());
   }
 
+  Tensor operator[](sizeT index) const {
+    assert(index < shape_.dim_value(index));
+    Tensor tensor;
+    tensor.storage_ = storage_;
+    tensor.offset   = index * mem_size(1);
+    tensor.type_    = type_;
+    tensor.shape_   = shape_.sub(1);
+    return tensor;
+  }
+
+  template <typename T = void>
+  T *get_ptr() {
+    return reinterpret_cast<T *>(storage_->data<byteT>() + offset);
+  }
+
   sizeT mem_size(sizeT axis) const noexcept {
-    assert(axis < shape_.size());
+    if (axis >= shape_.size()) {
+      return type_.size();
+    }
     return type_.size() * shape_.size(axis);
   }
 
   template <typename T, sizeT Dim>
   Accessor<T, Dim> make_accessor() {
-    return Accessor<T, Dim>(*this, storage_->data());
+    return Accessor<T, Dim>(*this, get_ptr<>());
   }
 
-  std::string get_string() const noexcept {
-    std::stringstream ss;
+  using traverseFun = bool (*)(void *ptr);
 
-    return std::move(ss.str());
+  void traverse(traverseFun fun) { traverse(get_ptr<byteT>(), 0, fun); }
+
+  std::string to_string() const noexcept {
+    std::string str;
+
+    return std::move(str);
   }
 
 private:
+  void traverse(byteT *ptr, sizeT axis, traverseFun fun) {
+    const auto &tensor = *this;
+    if (axis + 1 == tensor.shape().dim()) {
+      for (auto i = 0; i < tensor.shape().dim_value(axis); i++) {
+        fun(ptr + i * tensor.type().size());
+      }
+      return;
+    }
+    for (auto i = 0; i < tensor.shape().dim_value(axis); i++) {
+      traverse(ptr + i * tensor.mem_size(axis + 1), axis + 1, fun);
+    }
+  }
+
   std::shared_ptr<myt::Storage> storage_;
+  std::size_t                   offset{0};
   myt::Type                     type_{};
   myt::Shape                    shape_{};
 };

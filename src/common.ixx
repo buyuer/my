@@ -13,6 +13,7 @@ export module myt.common;
 export namespace myt {
 
 using sizeT  = std::size_t;
+using byteT  = std::uint8_t;
 using sint8  = std::int8_t;
 using uint8  = std::uint8_t;
 using sint16 = std::int16_t;
@@ -30,4 +31,4 @@ using cpx16  = std::complex<f16>;
 using cpx32  = std::complex<f32>;
 using cpx64  = std::complex<f64>;
 
-} // namespace myt::common
+} // namespace myt
