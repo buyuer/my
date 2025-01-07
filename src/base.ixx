@@ -320,7 +320,7 @@ public:
   }
 
   Tensor operator[](sizeT index) const {
-    assert(index < shape_.dim_value(index));
+    assert(index < shape_.dim_value(1));
     Tensor tensor;
     tensor.storage_ = storage_;
     tensor.offset   = index * mem_size(1);
