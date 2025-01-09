@@ -5,6 +5,7 @@
  */
 
 module;
+#include <array>
 #include <cassert>
 #include <complex>
 #include <concepts>
@@ -170,9 +171,9 @@ public:
   }
 
 private:
-  static constexpr size_type MAX_DIM = 8;
-  size_type                  dimension{};
-  size_type                  dimValues[MAX_DIM]{};
+  static constexpr size_type     MAX_DIM = 8;
+  size_type                      dimension{};
+  std::array<size_type, MAX_DIM> dimValues;
 };
 
 class Tensor;
@@ -217,6 +218,16 @@ public:
 
   virtual bool copy_mem_from(const Device &device) { return true; }
 
+  bool has_op(std::string_view op_name) const { return ops.contains(op_name); }
+
+  bool run(std::string_view op_name, Operator::Data &data) {
+    if (has_op(op_name)) {
+      auto &op = ops.at(op_name);
+      return op->run(data);
+    }
+    return false;
+  }
+
   Device::ID get_id() const noexcept { return id_; }
 
   Device::Index get_index() const noexcept { return index_; }
@@ -229,7 +240,7 @@ protected:
   Device::ID    id_{};
   Device::Index index_{};
 
-  std::map<std::string_view, Operator> ops{};
+  std::map<std::string_view, std::unique_ptr<Operator>> ops{};
 
   struct DeviceInfo {
     std::string_view name_;
