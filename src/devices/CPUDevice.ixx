@@ -7,7 +7,9 @@
 module;
 #include <map>
 #include <memory>
+#include <print>
 #include <string_view>
+#include <variant>
 export module myt.devices;
 
 import myt.base;
@@ -20,15 +22,13 @@ namespace cpu {
 class AddOp : public myt::Operator {
 public:
   AddOp() : myt::Operator("Add") {}
-
-  bool run(Data &data) override { return true; }
+  bool run(Data &data, Operator::Para &para) override;
 };
 
 class MulOp : public myt::Operator {
 public:
   MulOp() : myt::Operator("Mul") {}
-
-  bool run(Data &data) override { return true; }
+  bool run(Data &, Operator::Para &para) override { return true; }
 };
 
 } // namespace cpu
@@ -36,7 +36,7 @@ public:
 export class CPUDevice : public myt::Device {
 public:
   CPUDevice() : Device(CPU, 0) {
-    ops["Add"] = std::make_unique<Operator>("Add");
+    ops["Add"] = std::make_unique<cpu::AddOp>();
     ops["Mul"] = std::make_unique<cpu::MulOp>();
   }
   using myt::Device::Device;

@@ -5,6 +5,7 @@
  */
 
 module;
+#include <any>
 #include <array>
 #include <cassert>
 #include <complex>
@@ -12,6 +13,7 @@ module;
 #include <map>
 #include <string>
 #include <string_view>
+#include <variant>
 export module myt.base;
 
 import myt.common;
@@ -151,9 +153,11 @@ public:
 
   std::string to_string() const {
     std::string str{"["};
-    for (size_type axis = 0; axis < dimension; ++axis) {
+    size_type   axis = 0;
+    for (; axis < dimension - 1; ++axis) {
       str += std::to_string(dimValues[axis]) + ", ";
     }
+    str += std::to_string(dimValues[axis]);
     str += "]";
     return std::move(str);
   }
@@ -181,6 +185,7 @@ class Tensor;
 class Operator {
 public:
   using Data = std::map<std::string_view, myt::Tensor &>;
+  using Para = std::map<std::string_view, std::variant<f32, sint32>>;
 
   explicit Operator(const std::string &name) { name_ = name; }
 
@@ -188,7 +193,7 @@ public:
 
   virtual bool init() { return true; }
 
-  virtual bool run(Data &data) { return true; }
+  virtual bool run(Data &data, Para &para) { return true; }
 
   const std::string &get_name() { return name_; }
 
@@ -221,9 +226,18 @@ public:
   bool has_op(std::string_view op_name) const { return ops.contains(op_name); }
 
   bool run(std::string_view op_name, Operator::Data &data) {
+    Operator::Para para{};
     if (has_op(op_name)) {
       auto &op = ops.at(op_name);
-      return op->run(data);
+      return op->run(data, para);
+    }
+    return false;
+  }
+
+  bool run(std::string_view op_name, Operator::Data &data, Operator::Para &para) {
+    if (has_op(op_name)) {
+      auto &op = ops.at(op_name);
+      return op->run(data, para);
     }
     return false;
   }
@@ -249,32 +263,6 @@ protected:
       {"cpu"},
       {"cuda"},
   };
-};
-
-class Storage {
-public:
-  explicit Storage(Device &device, const sizeT size) : device_{device}, size_{size} { data_ = device.malloc(size); }
-
-  ~Storage() { device_.free(data_); }
-
-  Storage(const Storage &)            = delete;
-  Storage(Storage &&)                 = delete;
-  Storage &operator=(const Storage &) = delete;
-  Storage &operator=(Storage &&)      = delete;
-
-  sizeT size() const noexcept { return size_; }
-
-  template <typename T = void>
-  T *data() noexcept {
-    return static_cast<T *>(data_);
-  }
-
-  const Device &get_device() const noexcept { return device_; }
-
-private:
-  Device &device_;
-  void   *data_{};
-  sizeT   size_{};
 };
 
 class Tensor {
@@ -320,9 +308,9 @@ public:
   Tensor &operator=(const Tensor &) = default;
   Tensor &operator=(Tensor &&)      = default;
 
-  const Type   &type() const { return type_; }
-  const Shape  &shape() const { return shape_; }
-  const Device &device() const { return storage_->get_device(); }
+  const Type  &type() const { return type_; }
+  const Shape &shape() const { return shape_; }
+  Device      &device() const { return storage_->get_device(); }
 
   void create(Device &device, const Shape &shape, const Type &type = Type::FLOAT32) {
     type_    = type;
@@ -381,10 +369,36 @@ private:
     }
   }
 
-  std::shared_ptr<myt::Storage> storage_;
-  std::size_t                   offset{0};
-  myt::Type                     type_{};
-  myt::Shape                    shape_{};
+  class Storage {
+  public:
+    explicit Storage(Device &device, const sizeT size) : device_{device}, size_{size} { data_ = device.malloc(size); }
+
+    ~Storage() { device_.free(data_); }
+
+    Storage(const Storage &)            = delete;
+    Storage(Storage &&)                 = delete;
+    Storage &operator=(const Storage &) = delete;
+    Storage &operator=(Storage &&)      = delete;
+
+    sizeT size() const noexcept { return size_; }
+
+    template <typename T = void>
+    T *data() noexcept {
+      return static_cast<T *>(data_);
+    }
+
+    Device &get_device() const noexcept { return device_; }
+
+  private:
+    Device &device_;
+    void   *data_{};
+    sizeT   size_{};
+  };
+
+  std::shared_ptr<Storage> storage_;
+  std::size_t              offset{0};
+  myt::Type                type_{};
+  myt::Shape               shape_{};
 };
 
 } // namespace myt
