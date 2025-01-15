@@ -6,7 +6,7 @@ module;
 #include <print>
 #include <string_view>
 #include <variant>
-module myt.devices;
+module myt.devices.cpu;
 
 import myt.base;
 import myt.common;

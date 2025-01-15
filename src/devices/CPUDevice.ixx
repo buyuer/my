@@ -5,12 +5,13 @@
  */
 
 module;
+#include <cstdlib>
 #include <map>
 #include <memory>
 #include <print>
 #include <string_view>
 #include <variant>
-export module myt.devices;
+export module myt.devices.cpu;
 
 import myt.base;
 import myt.common;
@@ -33,16 +34,17 @@ public:
 
 } // namespace cpu
 
-export class CPUDevice : public myt::Device {
+export class CPUDevice : public myt::CPUDevice {
 public:
-  CPUDevice() : Device(CPU, 0) {
+  CPUDevice() : CPUDevice(CPU, 0) {
     ops["Add"] = std::make_unique<cpu::AddOp>();
     ops["Mul"] = std::make_unique<cpu::MulOp>();
   }
-  using myt::Device::Device;
+  using myt::CPUDevice::CPUDevice;
 
   void *malloc(myt::sizeT size) override { return operator new(size); }
   void  free(void *ptr) override { operator delete(ptr); }
+  void  memcpy(void *dst, void *src, sizeT size) override { std::memcpy(dst, src, size); }
 };
 
 } // namespace myt::devices
