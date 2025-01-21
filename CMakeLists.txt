@@ -6,13 +6,20 @@
 
 cmake_minimum_required(VERSION 3.28)
 
-project(mytensor LANGUAGES CXX CUDA)
-
 option(MYTENSOR_USE_CUDA OFF)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+project(mytensor LANGUAGES CXX)
+
+if (MYTENSOR_USE_CUDA)
+    find_package(CUDAToolkit REQUIRED)
+    set(CMAKE_CUDA_STANDARD 20)
+    set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+    enable_language(CUDA)
+endif ()
 
 add_subdirectory(src)
 

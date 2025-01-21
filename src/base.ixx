@@ -201,7 +201,7 @@ protected:
   std::string name_;
 };
 
-class CPUDevice {
+class Device {
 public:
   using Index = uint8;
 
@@ -210,10 +210,10 @@ public:
     CUDA,
   };
 
-  CPUDevice()          = default;
-  virtual ~CPUDevice() = default;
+  Device()          = default;
+  virtual ~Device() = default;
 
-  CPUDevice(const CPUDevice::ID &id, const CPUDevice::Index &index) : id_(id), index_(index) {};
+  Device(const Device::ID &id, const Device::Index &index) : id_(id), index_(index) {};
 
   virtual void *malloc(sizeT size) = 0;
 
@@ -221,19 +221,15 @@ public:
 
   virtual void memcpy(void *dst, void *src, sizeT size) = 0;
 
-  virtual bool copy_mem_to(const CPUDevice &device) { return true; }
+  virtual bool copy_mem_to(const Device &device) { return true; }
 
-  virtual bool copy_mem_from(const CPUDevice &device) { return true; }
+  virtual bool copy_mem_from(const Device &device) { return true; }
 
   bool has_op(std::string_view op_name) const { return ops.contains(op_name); }
 
   bool run(std::string_view op_name, Operator::Data &data) {
     Operator::Para para{};
-    if (has_op(op_name)) {
-      auto &op = ops.at(op_name);
-      return op->run(data, para);
-    }
-    return false;
+    run(op_name, data, para);
   }
 
   virtual bool run(std::string_view op_name, Operator::Data &data, Operator::Para &para) {
@@ -244,17 +240,17 @@ public:
     return false;
   }
 
-  CPUDevice::ID get_id() const noexcept { return id_; }
+  Device::ID get_id() const noexcept { return id_; }
 
-  CPUDevice::Index get_index() const noexcept { return index_; }
+  Device::Index get_index() const noexcept { return index_; }
 
   std::string get_string() const noexcept { return std::string{device_info[id_].name_} + std::to_string(index_); }
 
-  bool operator==(const CPUDevice &other) const noexcept { return id_ == other.id_ and index_ == other.index_; }
+  bool operator==(const Device &other) const noexcept { return id_ == other.id_ and index_ == other.index_; }
 
 protected:
-  CPUDevice::ID    id_{};
-  CPUDevice::Index index_{};
+  Device::ID    id_{};
+  Device::Index index_{};
 
   std::map<std::string_view, std::unique_ptr<Operator>> ops{};
 
@@ -269,8 +265,8 @@ protected:
 
 class Storage {
 public:
-  explicit Storage(CPUDevice &device, const sizeT size) : device_{device}, size_{size} { data_ = device.malloc(size); }
-  //explicit Storage(Storage &other, Device &target) : Storage(target, other.size_()) {}
+  explicit Storage(Device &device, const sizeT size) : device_{device}, size_{size} { data_ = device.malloc(size); }
+  // explicit Storage(Storage &other, Device &target) : Storage(target, other.size_()) {}
 
   ~Storage() { device_.free(data_); }
 
@@ -286,10 +282,10 @@ public:
     return static_cast<T *>(data_);
   }
 
-  CPUDevice &get_device() const noexcept { return device_; }
+  Device &get_device() const noexcept { return device_; }
 
 private:
-  CPUDevice &device_;
+  Device &device_;
   void   *data_{};
   sizeT   size_{};
 };
@@ -339,15 +335,15 @@ public:
 
   const Type  &type() const { return type_; }
   const Shape &shape() const { return shape_; }
-  CPUDevice      &device() const { return storage_->get_device(); }
+  Device      &device() const { return storage_->get_device(); }
 
-  void create(CPUDevice &device, const Shape &shape, const Type &type = Type::FLOAT32) {
+  void create(Device &device, const Shape &shape, const Type &type = Type::FLOAT32) {
     type_    = type;
     shape_   = shape;
     storage_ = std::make_shared<Storage>(device, shape_.size() * type.size());
   }
 
-  void to(CPUDevice &device) {
+  void to(Device &device) {
     if (device == storage_->get_device()) {
       return;
     }

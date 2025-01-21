@@ -34,13 +34,13 @@ public:
 
 } // namespace cpu
 
-export class CPUDevice : public myt::CPUDevice {
+export class CPUDevice : public myt::Device {
 public:
-  CPUDevice() : CPUDevice(CPU, 0) {
+  CPUDevice() : Device(CPU, 0) {
     ops["Add"] = std::make_unique<cpu::AddOp>();
     ops["Mul"] = std::make_unique<cpu::MulOp>();
   }
-  using myt::CPUDevice::CPUDevice;
+  using myt::Device::Device;
 
   void *malloc(myt::sizeT size) override { return operator new(size); }
   void  free(void *ptr) override { operator delete(ptr); }

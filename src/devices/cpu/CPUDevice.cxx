@@ -11,9 +11,7 @@ module myt.devices.cpu;
 import myt.base;
 import myt.common;
 
-namespace myt::devices {
-
-namespace cpu {
+namespace myt::devices::cpu {
 
 bool AddOp::run(Data &data, Operator::Para &para) {
   auto &input  = data.find("input")->second;
@@ -33,6 +31,4 @@ bool AddOp::run(Data &data, Operator::Para &para) {
   return true;
 }
 
-} // namespace cpu
-
-} // namespace myt::devices
+} // namespace myt::devices::cpu
