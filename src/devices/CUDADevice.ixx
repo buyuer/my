@@ -1,7 +1,7 @@
 /**
  * @author  dingddding@163.com
  * @date    2024.11.02
- * @brief   Implementation of CUDADevice
+ * @brief   CUDADevice
  */
 
 module;
@@ -21,7 +21,7 @@ namespace myt::devices {
 
 export class CUDADevice : public myt::Device {
 public:
-  CUDADevice() : Device(CPU, 0) {}
+  CUDADevice();
   using myt::Device::Device;
 
   void *malloc(myt::sizeT size) override;

@@ -23,6 +23,26 @@ import myt.common;
 
 namespace myt::devices {
 
+namespace cuda {
+class AddOp : public myt::Operator {
+public:
+  AddOp() : myt::Operator("Add") {}
+
+  bool run(Data &data, Operator::Para &para) override { return true; }
+};
+
+class MulOp : public myt::Operator {
+public:
+  MulOp() : myt::Operator("Mul") {}
+  bool run(Data &, Operator::Para &para) override { return true; }
+};
+} // namespace cuda
+
+CUDADevice::CUDADevice() : Device(CUDA, 0) {
+  ops["Add"] = std::make_unique<cuda::AddOp>();
+  ops["Mul"] = std::make_unique<cuda::MulOp>();
+}
+
 void *CUDADevice::malloc(myt::sizeT size) {
   void       *ret;
   cudaError_t err = cudaMalloc(&ret, size);
